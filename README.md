@@ -20,7 +20,8 @@
 ## 自动构建与发布
 
 推送到 `main` 或提交 Pull Request 时，GitHub Actions 会运行格式检查、单元测试和 `go vet`。
-推送 `v*` 标签时会自动构建 Linux `amd64`/`arm64` 和 Windows `amd64`/`arm64` 压缩包，并创建 GitHub Release。
+推送 `v*` 标签时会自动构建 Linux `amd64`/`arm64` 和 Windows `amd64`/`arm64`，
+同时发布可直接下载的二进制文件、`.exe` 和对应压缩包，并创建 GitHub Release。
 
 ```bash
 git tag v1.0.0

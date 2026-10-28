@@ -162,6 +162,21 @@ sudo journalctl -u shockstock -f
 sudo systemctl restart shockstock
 ```
 
+服务器上更新到 GitHub 最新 Release：
+
+```bash
+curl -fsSL \
+  https://raw.githubusercontent.com/qeqeq1/shockstock-monitor/main/deploy/update-from-github.sh \
+  -o /tmp/update-shockstock.sh
+sudo bash /tmp/update-shockstock.sh
+```
+
+也可以更新到指定版本：
+
+```bash
+sudo bash /tmp/update-shockstock.sh v1.1.1
+```
+
 生产环境建议通过 Nginx、Caddy 等反向代理提供 HTTPS，并只监听 `127.0.0.1:8080`。反代传递 `X-Forwarded-Proto: https` 后，登录 Cookie 会自动添加 `Secure`。
 
 ## Docker

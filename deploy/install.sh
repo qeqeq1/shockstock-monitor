@@ -34,7 +34,11 @@ mv "${INSTALL_PATH}.new" "${INSTALL_PATH}"
 
 initial_password=""
 if [[ ! -f "${ENV_FILE}" ]]; then
-  initial_password="$(tr -dc 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789' < /dev/urandom | head -c 24)"
+  if command -v openssl >/dev/null 2>&1; then
+    initial_password="$(openssl rand -hex 16)"
+  else
+    initial_password="$(date +%s%N)"
+  fi
   umask 077
   cat > "${ENV_FILE}" <<EOF
 LISTEN_ADDR=0.0.0.0:8080

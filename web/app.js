@@ -151,7 +151,7 @@ async function saveSettings(silent) {
 		if (state) {
 			state.settings = response;
 		}
-		elements.smtpPassword.value = "";
+		setFieldValue("#smtpPassword", "");
 		if (!silent) {
 			showToast("设置已保存，下一次检测将使用新配置", "success");
 		}

@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-const appVersion = "1.1.2"
+const appVersion = "1.1.3"
 
 type App struct {
 	store       *Store

@@ -34,6 +34,7 @@ func main() {
 		"STOCK_SOURCE_URL",
 		"https://shockhosting.com/api/server-stock.php",
 	)
+	affiliateID := envOrDefault("AFFILIATE_ID", "1469")
 
 	store, err := OpenStore(dataDir)
 	if err != nil {
@@ -71,7 +72,7 @@ func main() {
 	go app.RunScheduler(rootContext)
 
 	server := &http.Server{
-		Handler:           NewHandler(app, webFiles),
+		Handler:           NewHandler(app, webFiles, affiliateID),
 		ReadHeaderTimeout: 10 * time.Second,
 		ReadTimeout:       30 * time.Second,
 		WriteTimeout:      30 * time.Second,

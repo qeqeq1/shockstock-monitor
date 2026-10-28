@@ -15,6 +15,7 @@
 - SMTP 支持 STARTTLS、SSL/TLS 和不加密连接。
 - SQLite 保存当前库存、库存变化、检测记录、邮件记录、日志和登录会话。
 - 外部 API 支持状态查询、库存筛选和手动触发检测。
+- 公开 Looking Glass 页面，展示 17 个机房的源站 IPv4/IPv6、测速文件、当前库存和 AFF 购买链接。
 - 附带 Dockerfile、Docker Compose 和 systemd 服务文件。
 
 ## 自动构建与发布
@@ -38,6 +39,11 @@ go run .
 ```
 
 打开 `http://localhost:8080`。
+
+公开 Looking Glass 页面：`http://localhost:8080/lg`
+
+该页面只展示测试信息，不代为执行 ping、mtr 或 traceroute，也不会代理测速流量。
+源站 IP 和 `curl --resolve` 命令可让你从本机直连节点，避免 Cloudflare 对延迟和带宽结果造成干扰。
 
 第一次启动时如果没有设置 `ADMIN_PASSWORD`，程序会生成一个随机管理密码并打印在终端：
 
@@ -182,6 +188,7 @@ ADMIN_PASSWORD='replace-with-a-strong-password' docker compose up -d --build
 | `RESET_ADMIN_PASSWORD` | 空 | 重置已有管理密码，使用后移除 |
 | `API_TOKEN` | 随机生成 | 首次初始化 API Token |
 | `STOCK_SOURCE_URL` | Shock Hosting 接口 | 库存数据源 |
+| `AFFILIATE_ID` | `1469` | Looking Glass 购买链接使用的 AFF ID |
 
 例如设置 `LISTEN_ADDR=127.0.0.1:8080` 且 8080 已被占用，服务会依次尝试
 8081、8082，直到找到空闲端口；实际监听地址会写入启动日志。

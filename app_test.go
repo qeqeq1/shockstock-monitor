@@ -205,13 +205,37 @@ func TestHandlerAuthentication(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	handler := NewHandler(app, webFiles)
+	handler := NewHandler(app, webFiles, "1469")
 
 	request := httptest.NewRequest(http.MethodGet, "/api/v1/stock", nil)
 	response := httptest.NewRecorder()
 	handler.ServeHTTP(response, request)
 	if response.Code != http.StatusUnauthorized {
 		t.Fatalf("unauthenticated API status = %d", response.Code)
+	}
+
+	request = httptest.NewRequest(http.MethodGet, "/api/public/stock", nil)
+	response = httptest.NewRecorder()
+	handler.ServeHTTP(response, request)
+	if response.Code != http.StatusOK {
+		t.Fatalf("public LG API status = %d, body=%s", response.Code, response.Body.String())
+	}
+	var publicStock LGStockResponse
+	if err := json.Unmarshal(response.Body.Bytes(), &publicStock); err != nil {
+		t.Fatal(err)
+	}
+	if len(publicStock.Locations) != 17 {
+		t.Fatalf("LG locations = %d, want 17", len(publicStock.Locations))
+	}
+	if !strings.Contains(publicStock.Locations[0].Products[0].BuyURL, "aff=1469") {
+		t.Fatalf("affiliate URL missing: %s", publicStock.Locations[0].Products[0].BuyURL)
+	}
+
+	request = httptest.NewRequest(http.MethodGet, "/lg", nil)
+	response = httptest.NewRecorder()
+	handler.ServeHTTP(response, request)
+	if response.Code != http.StatusOK || !strings.Contains(response.Body.String(), "Looking Glass") {
+		t.Fatalf("LG page status = %d", response.Code)
 	}
 
 	request = httptest.NewRequest(http.MethodGet, "/api/v1/status", nil)

@@ -1344,6 +1344,16 @@ textarea:focus {
 		padding: 0 11px;
 	}
 
+	.topbar-link {
+		padding: 0 11px;
+		font-size: 0;
+	}
+
+	.topbar-link svg {
+		width: 18px;
+		height: 18px;
+	}
+
 	.main {
 		padding-top: 28px;
 	}

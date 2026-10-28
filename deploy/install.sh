@@ -43,6 +43,7 @@ AUTO_PORT_ATTEMPTS=20
 DATA_DIR=${DATA_DIR}
 ADMIN_PASSWORD=${initial_password}
 STOCK_SOURCE_URL=https://shockhosting.com/api/server-stock.php
+AFFILIATE_ID=1469
 EOF
   umask 022
 fi

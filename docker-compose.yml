@@ -8,6 +8,7 @@ services:
       LISTEN_ADDR: ":8080"
       DATA_DIR: "/data"
       ADMIN_PASSWORD: "${ADMIN_PASSWORD:-change-this-before-exposing}"
+      AFFILIATE_ID: "${AFFILIATE_ID:-1469}"
     volumes:
       - shockstock-data:/data
 

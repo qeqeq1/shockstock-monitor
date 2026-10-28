@@ -15,15 +15,17 @@ import (
 const sessionCookie = "shockstock_session"
 
 type Handler struct {
-	app      *App
-	webFiles fs.FS
+	app         *App
+	webFiles    fs.FS
+	affiliateID string
 }
 
-func NewHandler(app *App, webFiles fs.FS) http.Handler {
-	handler := &Handler{app: app, webFiles: webFiles}
+func NewHandler(app *App, webFiles fs.FS, affiliateID string) http.Handler {
+	handler := &Handler{app: app, webFiles: webFiles, affiliateID: affiliateID}
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /healthz", handler.health)
+	mux.HandleFunc("GET /api/public/stock", handler.publicLGStock)
 	mux.HandleFunc("GET /api/v1/status", handler.apiToken(handler.apiStatus))
 	mux.HandleFunc("GET /api/v1/stock", handler.apiToken(handler.apiStock))
 	mux.HandleFunc("GET /api/v1/stock/{id}", handler.apiToken(handler.apiProduct))
@@ -40,6 +42,8 @@ func NewHandler(app *App, webFiles fs.FS) http.Handler {
 	mux.HandleFunc("PUT /admin/api/password", handler.admin(handler.changePassword))
 
 	mux.HandleFunc("GET /admin", handler.serveIndex)
+	mux.HandleFunc("GET /lg", handler.serveLookingGlass)
+	mux.HandleFunc("GET /looking-glass", handler.serveLookingGlass)
 	mux.HandleFunc("GET /", handler.serveStatic)
 
 	return securityHeaders(mux)
@@ -369,6 +373,17 @@ func (h *Handler) serveIndex(w http.ResponseWriter, r *http.Request) {
 	data, err := fs.ReadFile(h.webFiles, "index.html")
 	if err != nil {
 		http.Error(w, "web application unavailable", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-store")
+	_, _ = w.Write(data)
+}
+
+func (h *Handler) serveLookingGlass(w http.ResponseWriter, r *http.Request) {
+	data, err := fs.ReadFile(h.webFiles, "lg.html")
+	if err != nil {
+		http.Error(w, "looking glass unavailable", http.StatusInternalServerError)
 		return
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")

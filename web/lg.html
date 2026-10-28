@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="color-scheme" content="light">
+	<title>Looking Glass · Shock Stock</title>
+	<link rel="icon" href="favicon.svg" type="image/svg+xml">
+	<link rel="stylesheet" href="lg.css">
+</head>
+<body>
+	<header class="site-header">
+		<div class="header-inner">
+			<a class="brand" href="/lg">
+				<span class="brand-mark" aria-hidden="true">SS</span>
+				<span class="brand-copy">
+					<strong>Shock Stock</strong>
+					<small>Looking Glass</small>
+				</span>
+			</a>
+			<nav class="header-links" aria-label="页面导航">
+				<a class="button secondary" href="/">
+					<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 21v-7"/><path d="M4 10V3"/><path d="M12 21v-9"/><path d="M12 8V3"/><path d="M20 21v-5"/><path d="M20 12V3"/><path d="M2 14h4"/><path d="M10 8h4"/><path d="M18 16h4"/></svg>
+					库存管理
+				</a>
+			</nav>
+		</div>
+	</header>
+
+	<main class="main">
+		<section class="page-heading">
+			<div>
+				<span class="eyebrow">ORIGIN NETWORK TOOLS</span>
+				<h1>Looking Glass</h1>
+				<p>使用 Shock Hosting 提供的源站 IP、测速文件和购买链接。</p>
+			</div>
+			<div id="updateStatus" class="update-status">
+				<span class="status-dot"></span>
+				<div>
+					<span>库存更新时间</span>
+					<strong id="lastCheck">加载中</strong>
+				</div>
+			</div>
+		</section>
+
+		<section class="summary-grid" aria-label="库存汇总">
+			<div class="summary-item">
+				<span>机房</span>
+				<strong id="summaryLocations">—</strong>
+				<small>全球节点</small>
+			</div>
+			<div class="summary-item">
+				<span>有货套餐</span>
+				<strong id="summaryAvailable">—</strong>
+				<small id="summaryAvailableDetail">共 — 个</small>
+			</div>
+			<div class="summary-item">
+				<span>当前监控</span>
+				<strong id="summaryWatched">—</strong>
+				<small>自动检测中</small>
+			</div>
+			<div class="summary-item">
+				<span>库存源</span>
+				<strong id="summarySource">—</strong>
+				<small id="summarySourceDetail">最新检测状态</small>
+			</div>
+		</section>
+
+		<section class="toolbar" aria-label="筛选与测速选项">
+			<label class="field search-field">
+				<span>搜索</span>
+				<input id="search" type="search" placeholder="机房、设施、套餐或 IP">
+			</label>
+			<label class="field">
+				<span>库存</span>
+				<select id="stockFilter">
+					<option value="all">全部机房</option>
+					<option value="available">仅有货</option>
+					<option value="out">仅售罄</option>
+				</select>
+			</label>
+			<div class="field size-field">
+				<span>测速文件</span>
+				<div class="segmented" id="sizeSelector" role="group" aria-label="测速文件大小">
+					<button type="button" data-size="100MB">100 MB</button>
+					<button class="active" type="button" data-size="1GB">1 GB</button>
+					<button type="button" data-size="2GB">2 GB</button>
+				</div>
+			</div>
+		</section>
+
+		<div class="result-meta">
+			<span id="resultCount">正在加载机房</span>
+			<span>测速流量由你的浏览器或终端直接连接节点</span>
+		</div>
+
+		<section id="locationGrid" class="location-grid" aria-live="polite">
+			<div class="loading-state">正在读取 Looking Glass 节点…</div>
+		</section>
+	</main>
+
+	<div id="toast" class="toast" role="status" hidden></div>
+	<script src="lg.js"></script>
+</body>
+</html>

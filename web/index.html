@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="color-scheme" content="light">
+	<title>Shock Stock · 补货监控</title>
+	<link rel="icon" href="favicon.svg" type="image/svg+xml">
+	<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+	<div id="loginView" class="login-shell">
+		<div class="login-brand">
+			<span class="brand-mark" aria-hidden="true">SS</span>
+			<div>
+				<strong>Shock Stock</strong>
+				<span>Dedicated server watch</span>
+			</div>
+		</div>
+		<main class="login-panel">
+			<div class="login-heading">
+				<span class="eyebrow">ADMIN</span>
+				<h1>登录监控控制台</h1>
+				<p>管理库存轮询、邮件通知与 API。</p>
+			</div>
+			<form id="loginForm" class="stack-form">
+				<label class="field">
+					<span>管理密码</span>
+					<div class="password-wrap">
+						<input id="loginPassword" name="password" type="password" autocomplete="current-password" required autofocus>
+						<button class="icon-button password-toggle" type="button" data-target="loginPassword" title="显示密码" aria-label="显示密码">
+							<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M2.1 12s3.6-7 9.9-7 9.9 7 9.9 7-3.6 7-9.9 7S2.1 12 2.1 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+						</button>
+					</div>
+				</label>
+				<p id="loginError" class="form-error" role="alert" hidden></p>
+				<button class="button primary wide" type="submit">进入控制台</button>
+			</form>
+		</main>
+		<p class="login-footnote">库存数据来自 Shock Hosting 公共接口</p>
+	</div>
+
+	<div id="appView" class="app-shell" hidden>
+		<header class="topbar">
+			<div class="topbar-inner">
+				<a class="brand" href="/" aria-label="Shock Stock 首页">
+					<span class="brand-mark" aria-hidden="true">SS</span>
+					<span class="brand-copy">
+						<strong>Shock Stock</strong>
+						<small>补货监控</small>
+					</span>
+				</a>
+				<div class="topbar-actions">
+					<div id="serviceState" class="service-state">
+						<span class="state-dot"></span>
+						<span id="serviceStateText">正在检查</span>
+					</div>
+					<button id="checkNowButton" class="button secondary" type="button">
+						<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15.5 6.2L3 16"/><path d="M3 21v-5h5"/><path d="M3 12A9 9 0 0 1 18.5 5.8L21 8"/><path d="M21 3v5h-5"/></svg>
+						立即检测
+					</button>
+					<button id="logoutButton" class="icon-button" type="button" title="退出登录" aria-label="退出登录">
+						<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/></svg>
+					</button>
+				</div>
+			</div>
+		</header>
+
+		<main class="main">
+			<div class="page-heading">
+				<div>
+					<span class="eyebrow">DEDICATED SERVER INVENTORY</span>
+					<h1>补货监控</h1>
+					<p>检查库存变化，向邮箱发送补货提醒，并通过 API 读取最新状态。</p>
+				</div>
+				<div class="heading-meta">
+					<span>上次检测</span>
+					<strong id="lastCheckHeading">尚未检测</strong>
+				</div>
+			</div>
+
+			<nav class="tabs" aria-label="控制台页面">
+				<button class="tab active" type="button" data-tab="overview" aria-selected="true">总览</button>
+				<button class="tab" type="button" data-tab="products" aria-selected="false">套餐</button>
+				<button class="tab" type="button" data-tab="notifications" aria-selected="false">邮件通知</button>
+				<button class="tab" type="button" data-tab="api" aria-selected="false">API 与系统</button>
+			</nav>
+
+			<section id="tab-overview" class="tab-panel active" aria-labelledby="总览">
+				<div class="status-band">
+					<div class="status-main">
+						<span id="overviewStatusDot" class="status-symbol"></span>
+						<div>
+							<strong id="overviewStatusTitle">等待首次检测</strong>
+							<span id="overviewStatusDetail">服务启动后会立即检查一次库存。</span>
+						</div>
+					</div>
+					<div class="countdown">
+						<span>下次检测</span>
+						<strong id="nextCheckText">等待调度</strong>
+					</div>
+				</div>
+
+				<div class="stats-grid">
+					<div class="stat">
+						<span>监控套餐</span>
+						<strong id="statWatched">—</strong>
+						<small id="statTotal">共 — 个</small>
+					</div>
+					<div class="stat">
+						<span>当前有货</span>
+						<strong id="statAvailable">—</strong>
+						<small id="statAvailableWatched">监控项 —</small>
+					</div>
+					<div class="stat">
+						<span>已售罄</span>
+						<strong id="statOut">—</strong>
+						<small>已完成库存检查</small>
+					</div>
+					<div class="stat">
+						<span>下次检测</span>
+						<strong id="statInterval">—</strong>
+						<small id="statCheckedAt">最近 —</small>
+					</div>
+				</div>
+
+				<div class="content-grid">
+					<section class="panel">
+						<div class="panel-heading">
+							<div>
+								<span class="eyebrow">RECENT STOCK CHANGES</span>
+								<h2>库存变化</h2>
+							</div>
+							<button class="text-button" type="button" data-goto-tab="products">查看全部</button>
+						</div>
+						<div id="recentEvents" class="activity-list"></div>
+					</section>
+					<section class="panel">
+						<div class="panel-heading">
+							<div>
+								<span class="eyebrow">NOTIFICATIONS</span>
+								<h2>邮件记录</h2>
+							</div>
+							<button class="text-button" type="button" data-goto-tab="notifications">邮件设置</button>
+						</div>
+						<div id="recentNotifications" class="activity-list compact"></div>
+					</section>
+				</div>
+
+				<section class="panel">
+					<div class="panel-heading">
+						<div>
+							<span class="eyebrow">SERVICE LOG</span>
+							<h2>最近活动</h2>
+						</div>
+						<span id="sourceLabel" class="panel-meta"></span>
+					</div>
+					<div id="recentLogs" class="log-list"></div>
+				</section>
+			</section>
+
+			<section id="tab-products" class="tab-panel" hidden>
+				<section class="panel product-panel">
+					<div class="panel-heading product-heading">
+						<div>
+							<span class="eyebrow">INVENTORY</span>
+							<h2>套餐监控</h2>
+						</div>
+						<div class="panel-actions">
+							<button id="watchVisibleButton" class="button subtle" type="button">监控当前结果</button>
+							<button id="unwatchVisibleButton" class="button subtle" type="button">取消当前结果</button>
+						</div>
+					</div>
+					<div class="filters">
+						<label class="field search-field">
+							<span>搜索</span>
+							<input id="productSearch" type="search" placeholder="名称、机房、配置">
+						</label>
+						<label class="field">
+							<span>机房</span>
+							<select id="locationFilter">
+								<option value="all">所有机房</option>
+							</select>
+						</label>
+						<label class="field">
+							<span>库存</span>
+							<select id="stockFilter">
+								<option value="all">全部状态</option>
+								<option value="available">有货</option>
+								<option value="out">售罄</option>
+								<option value="unknown">未检查</option>
+								<option value="watched">仅监控项</option>
+							</select>
+						</label>
+					</div>
+					<div class="table-meta">
+						<span id="productResultCount">— 个套餐</span>
+						<span id="watchedResultCount">— 个已监控</span>
+					</div>
+					<div class="table-wrap">
+						<table class="product-table">
+							<thead>
+								<tr>
+									<th>套餐</th>
+									<th>机房</th>
+									<th>硬件</th>
+									<th>价格</th>
+									<th>库存</th>
+									<th class="watch-column">监控</th>
+								</tr>
+							</thead>
+							<tbody id="productRows"></tbody>
+						</table>
+						<div id="productEmpty" class="empty-state" hidden>
+							<strong>没有匹配的套餐</strong>
+							<span>调整搜索或筛选条件后重试。</span>
+						</div>
+					</div>
+				</section>
+			</section>
+
+			<section id="tab-notifications" class="tab-panel" hidden>
+				<form id="settingsForm" class="settings-layout">
+					<section class="panel">
+						<div class="panel-heading">
+							<div>
+								<span class="eyebrow">POLLING</span>
+								<h2>检测频率</h2>
+							</div>
+						</div>
+						<div class="field-row single">
+							<label class="field">
+								<span>检测间隔（秒）</span>
+								<input id="pollInterval" type="number" min="30" max="86400" step="1" required>
+								<small>最小 30 秒。页面只在新库存出现时发送邮件。</small>
+							</label>
+						</div>
+					</section>
+
+					<section class="panel">
+						<div class="panel-heading">
+							<div>
+								<span class="eyebrow">SMTP DELIVERY</span>
+								<h2>邮件服务器</h2>
+							</div>
+							<label class="switch-row">
+								<span>启用通知</span>
+								<input id="smtpEnabled" type="checkbox">
+								<span class="switch" aria-hidden="true"></span>
+							</label>
+						</div>
+						<div class="field-row">
+							<label class="field span-2">
+								<span>SMTP 主机</span>
+								<input id="smtpHost" type="text" autocomplete="off" placeholder="smtp.example.com">
+							</label>
+							<label class="field">
+								<span>端口</span>
+								<input id="smtpPort" type="number" min="1" max="65535" step="1">
+							</label>
+							<label class="field">
+								<span>加密方式</span>
+								<select id="smtpSecurity">
+									<option value="starttls">STARTTLS</option>
+									<option value="ssl">SSL/TLS</option>
+									<option value="none">不加密</option>
+								</select>
+							</label>
+							<label class="field">
+								<span>用户名</span>
+								<input id="smtpUsername" type="text" autocomplete="username">
+							</label>
+							<label class="field">
+								<span>密码</span>
+								<div class="password-wrap">
+									<input id="smtpPassword" type="password" autocomplete="new-password" placeholder="留空则保持不变">
+									<button class="icon-button password-toggle" type="button" data-target="smtpPassword" title="显示密码" aria-label="显示密码">
+										<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M2.1 12s3.6-7 9.9-7 9.9 7 9.9 7-3.6 7-9.9 7S2.1 7 2.1 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+									</button>
+								</div>
+							</label>
+							<label class="field span-2">
+								<span>发件地址</span>
+								<input id="smtpFrom" type="text" autocomplete="email" placeholder="Shock Stock <alerts@example.com>">
+							</label>
+							<label class="field">
+								<span>主题前缀</span>
+								<input id="smtpSubjectPrefix" type="text" placeholder="[Shock Stock]">
+							</label>
+							<label class="field span-3">
+								<span>收件人</span>
+								<textarea id="smtpRecipients" rows="3" placeholder="one@example.com&#10;two@example.com"></textarea>
+								<small>每行一个，也可以使用逗号分隔。</small>
+							</label>
+						</div>
+						<div class="form-actions">
+							<button id="testEmailButton" class="button secondary" type="button">
+								<svg aria-hidden="true" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+								发送测试邮件
+							</button>
+							<button class="button primary" type="submit">保存设置</button>
+						</div>
+					</section>
+				</form>
+			</section>
+
+			<section id="tab-api" class="tab-panel" hidden>
+				<div class="content-grid api-grid">
+					<section class="panel">
+						<div class="panel-heading">
+							<div>
+								<span class="eyebrow">AUTHENTICATION</span>
+								<h2>API Token</h2>
+							</div>
+						</div>
+						<div class="token-field">
+							<input id="apiToken" type="password" readonly aria-label="API Token">
+							<button id="revealTokenButton" class="icon-button" type="button" title="显示 Token" aria-label="显示 Token">
+								<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M2.1 12s3.6-7 9.9-7 9.9 7 9.9 7-3.6 7-9.9 7S2.1 12 2.1 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+							</button>
+							<button id="copyTokenButton" class="icon-button" type="button" title="复制 Token" aria-label="复制 Token">
+								<svg aria-hidden="true" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+							</button>
+							<button id="rotateTokenButton" class="button subtle" type="button">重新生成</button>
+						</div>
+						<p class="helper-text">请求头使用 <code>Authorization: Bearer &lt;token&gt;</code>，也可以使用 <code>X-API-Key</code>。</p>
+					</section>
+
+					<section class="panel">
+						<div class="panel-heading">
+							<div>
+								<span class="eyebrow">RUNTIME</span>
+								<h2>服务信息</h2>
+							</div>
+						</div>
+						<dl class="system-list">
+							<div><dt>版本</dt><dd id="systemVersion">—</dd></div>
+							<div><dt>监听地址</dt><dd id="currentOrigin">—</dd></div>
+							<div><dt>库存源</dt><dd id="systemSource">—</dd></div>
+							<div><dt>已运行</dt><dd id="systemUptime">—</dd></div>
+						</dl>
+					</section>
+				</div>
+
+				<section class="panel">
+					<div class="panel-heading">
+						<div>
+							<span class="eyebrow">HTTP API</span>
+							<h2>接口调用</h2>
+						</div>
+					</div>
+					<div class="endpoint-list">
+						<div class="endpoint">
+							<span class="method get">GET</span>
+							<code>/api/v1/status</code>
+							<span>服务状态与汇总</span>
+						</div>
+						<div class="endpoint">
+							<span class="method get">GET</span>
+							<code>/api/v1/stock</code>
+							<span>全部套餐与库存，可加 <code>?location=jp&amp;status=available</code></span>
+						</div>
+						<div class="endpoint">
+							<span class="method get">GET</span>
+							<code>/api/v1/stock/{id}</code>
+							<span>读取单个商品 ID</span>
+						</div>
+						<div class="endpoint">
+							<span class="method post">POST</span>
+							<code>/api/v1/check</code>
+							<span>立即触发一次后台检测</span>
+						</div>
+					</div>
+					<div class="code-block">
+						<button id="copyCurlButton" class="code-copy" type="button" title="复制 cURL" aria-label="复制 cURL">
+							<svg aria-hidden="true" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+						</button>
+						<pre id="curlExample"></pre>
+					</div>
+				</section>
+
+				<div class="content-grid">
+					<section class="panel">
+						<div class="panel-heading">
+							<div>
+								<span class="eyebrow">SECURITY</span>
+								<h2>修改管理密码</h2>
+							</div>
+						</div>
+						<form id="passwordForm" class="stack-form">
+							<label class="field">
+								<span>当前密码</span>
+								<input id="currentPassword" type="password" autocomplete="current-password" required>
+							</label>
+							<label class="field">
+								<span>新密码</span>
+								<input id="newPassword" type="password" autocomplete="new-password" minlength="10" required>
+							</label>
+							<label class="field">
+								<span>确认新密码</span>
+								<input id="confirmPassword" type="password" autocomplete="new-password" minlength="10" required>
+							</label>
+							<button class="button primary" type="submit">更新密码</button>
+						</form>
+					</section>
+					<section class="panel">
+						<div class="panel-heading">
+							<div>
+								<span class="eyebrow">LOG</span>
+								<h2>服务日志</h2>
+							</div>
+						</div>
+						<div id="systemLogs" class="log-list tall"></div>
+					</section>
+				</div>
+			</section>
+		</main>
+	</div>
+
+	<div id="toast" class="toast" role="status" hidden></div>
+	<script src="app.js"></script>
+</body>
+</html>

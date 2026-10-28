@@ -1,0 +1,15 @@
+services:
+  shockstock:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      LISTEN_ADDR: ":8080"
+      DATA_DIR: "/data"
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-change-this-before-exposing}"
+    volumes:
+      - shockstock-data:/data
+
+volumes:
+  shockstock-data:

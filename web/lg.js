@@ -167,7 +167,9 @@ function productRow(product) {
 			badgeText = "售罄";
 		}
 	}
-	const disabled = !product.checked || product.stock <= 0;
+	const soldOut = product.checked && product.stock <= 0;
+	const buttonClass = soldOut ? "sold-out" : "";
+	const buttonText = soldOut ? "售罄" : product.checked ? "购买" : "查看";
 	return `
 		<div class="product-row">
 			<div>
@@ -178,7 +180,7 @@ function productRow(product) {
 			<div class="product-price">$${Number(product.price).toFixed(2)}/月</div>
 			<div class="product-action">
 				<span class="stock-badge ${badgeClass}">${escapeHTML(badgeText)}</span>
-				<a class="buy-link ${disabled ? "disabled" : ""}" href="${escapeAttribute(product.buyUrl)}" target="_blank" rel="noopener nofollow" ${disabled ? 'tabindex="-1" aria-disabled="true"' : ""}>${disabled ? "售罄" : "购买"}</a>
+				<a class="buy-link ${buttonClass}" href="${escapeAttribute(product.buyUrl)}" target="_blank" rel="noopener nofollow">${buttonText}</a>
 			</div>
 		</div>
 	`;

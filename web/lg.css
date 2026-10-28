@@ -542,11 +542,16 @@ select:focus {
 	color: #fff;
 }
 
-.buy-link.disabled {
+.buy-link.sold-out {
 	border-color: var(--line-strong);
 	background: var(--surface-muted);
 	color: var(--muted);
-	pointer-events: none;
+}
+
+.buy-link.sold-out:hover {
+	border-color: var(--red);
+	background: #f8e8e9;
+	color: var(--red-dark);
 }
 
 .loading-state,
